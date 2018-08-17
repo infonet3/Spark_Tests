@@ -1,7 +1,7 @@
 from pyspark import SparkConf, SparkContext
 
 #Basic Setup
-conf = SparkConf().setMaster("local").setAppName("Superheros")
+conf = SparkConf().setMaster("local[*]").setAppName("Superheros")
 sc = SparkContext(conf=conf)
 
 def countCoOccurences(line):
@@ -19,7 +19,11 @@ namesRDD = names.map(parseNames)
 
 lines = sc.textFile("/Users/mattjones/Desktop/SparkCourse/Marvel-Graph.txt")
 pairings = lines.map(countCoOccurences)
+pairings.saveAsTextFile("Pairings")
+
 totalFriendsByCharacter = pairings.reduceByKey(lambda x, y: x + y)
+totalFriendsByCharacter.saveAsTextFile("Reduced")
+
 flipped = totalFriendsByCharacter.map(lambda x: (x[1], x[0]))
 
 mostPopular = flipped.max()
